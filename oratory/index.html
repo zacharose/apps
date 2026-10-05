@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Oratory">
+<title>Oratory</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<meta name="theme-color" content="#1b1420">
+
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f7f5f2; --surf:#fff; --surf2:#efebe5; --line:#ddd5ca;
+  --ink:#1c1916; --ink2:#5b5349; --ink3:#8b8378;
+  --accent:#5b3b6e; --accent2:#7a5490;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121011; --surf:#1b181a; --surf2:#241f24; --line:#332c33;
+    --ink:#ece7e3; --ink2:#a79e96; --ink3:#766d66;
+    --accent:#b592cc; --accent2:#c8aede;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121011; --surf:#1b181a; --surf2:#241f24; --line:#332c33;
+  --ink:#ece7e3; --ink2:#a79e96; --ink3:#766d66;
+  --accent:#b592cc; --accent2:#c8aede;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:ui-serif,Georgia,"Iowan Old Style","Times New Roman",serif;
+  font-size:16.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:transparent}
+
+.wrap{max-width:560px;margin:0 auto;padding:0 15px 104px}
+header{padding:16px 0 8px;text-align:center}
+h1{font-size:16px;margin:0;letter-spacing:.26em;text-transform:uppercase;font-weight:400;color:var(--accent)}
+.lday{font-size:12.5px;color:var(--ink3);letter-spacing:.03em;margin-top:4px;font-style:italic}
+
+.card{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:12px}
+.card h2{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);
+  margin:0 0 10px;font-weight:600;font-family:ui-sans-serif,system-ui,sans-serif}
+.row{display:flex;align-items:center;gap:10px}
+.row.sb{justify-content:space-between}
+.grow{flex:1;min-width:0}
+.big{font-size:25px;line-height:1.2;letter-spacing:-.01em}
+.sub{font-size:14px;color:var(--ink2);line-height:1.5}
+.note{font-size:12.5px;color:var(--ink3);font-style:italic;margin-top:9px}
+
+.btn{display:block;width:100%;padding:13px;border-radius:11px;text-align:center;background:var(--accent);
+  color:var(--bg);font-weight:600;font-size:15.5px;min-height:46px;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.sm{padding:9px;font-size:13.5px;min-height:38px}
+
+.it{background:var(--surf);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.it>summary{padding:14px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:11px}
+.it>summary::-webkit-details-marker{display:none}
+.it .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:600;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+.it .nm{font-weight:600;font-size:16.5px}
+.it .dur{margin-left:auto;font-size:12px;color:var(--ink3);white-space:nowrap;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+.itb{padding:0 14px 14px;border-top:1px solid var(--line);margin-top:2px;padding-top:12px}
+.pray{font-size:16px;line-height:1.62;white-space:pre-wrap;color:var(--ink)}
+.vr{color:var(--accent);font-weight:600}
+
+nav{position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:color-mix(in srgb,var(--surf) 94%,transparent);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);display:flex;
+  padding-bottom:calc(env(safe-area-inset-bottom,0px) + 4px);padding-top:4px}
+nav button{flex:1;padding:7px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--ink3);min-height:50px}
+nav button.on{color:var(--accent)}
+nav .lbl{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+nav svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* guided mode */
+#gd{position:fixed;inset:0;z-index:200;background:var(--bg);display:none;flex-direction:column;
+  padding:env(safe-area-inset-top,0px) 18px calc(env(safe-area-inset-bottom,0px) + 14px)}
+#gd.on{display:flex}
+.gbar{display:flex;align-items:center;justify-content:space-between;padding:12px 0 2px;flex-shrink:0}
+.gbar button{font-size:13.5px;color:var(--ink3);padding:8px;min-height:40px;font-weight:600;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+.gpos{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);
+  font-family:ui-sans-serif,system-ui,sans-serif}
+.gmid{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;
+  justify-content:center;padding:10px 0 16px;cursor:pointer}
+.gttl{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);
+  font-weight:600;margin-bottom:10px;font-family:ui-sans-serif,system-ui,sans-serif}
+.gmyst{font-size:30px;line-height:1.18;letter-spacing:-.015em;margin-bottom:12px}
+.gtext{font-size:19px;line-height:1.62;white-space:pre-wrap}
+.gscr{font-size:15px;color:var(--ink2);font-style:italic;margin-top:14px;
+  border-left:2px solid var(--accent);padding-left:13px}
+.gsub{font-size:14px;color:var(--ink3);font-style:italic;margin-top:10px}
+.beads{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 4px}
+.beads i{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--line);display:block}
+.beads i.on{background:var(--accent);border-color:var(--accent);transform:scale(1.25)}
+.beads i.past{background:var(--ink3);border-color:var(--ink3)}
+.decs{display:flex;gap:6px;margin-top:12px}
+.decs i{flex:1;height:3px;border-radius:2px;background:var(--line);display:block}
+.decs i.on{background:var(--accent)}
+.decs i.past{background:var(--ink3)}
+.silc{font-size:54px;font-weight:300;text-align:center;font-variant-numeric:tabular-nums;
+  letter-spacing:-.03em;margin:18px 0 12px;color:var(--ink3);font-family:ui-sans-serif,system-ui,sans-serif}
+.silc.run{color:var(--accent)}
+.gnav{display:flex;gap:9px;flex-shrink:0;padding-top:8px}
+.gnav .back{flex:0 0 74px}
+.ghint{text-align:center;font-size:11.5px;color:var(--ink3);padding-bottom:7px;
+  font-family:ui-sans-serif,system-ui,sans-serif;letter-spacing:.04em}
+
+label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);
+  margin:13px 0 5px;font-weight:600;font-family:ui-sans-serif,system-ui,sans-serif}
+select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);
+  background:var(--surf2);font-size:16px;min-height:44px}
+.bind{display:flex;gap:9px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.bind:last-child{border-bottom:none}
+.bind b{color:var(--accent);flex:0 0 96px;font-weight:600;font-size:13px;
+  font-family:ui-sans-serif,system-ui,sans-serif;padding-top:2px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Oratory</h1>
+    <div class="lday" id="lday"></div>
+  </header>
+  <main id="view"></main>
+</div>
+
+<div id="gd">
+  <div class="gbar">
+    <button data-a="gx">&times; Close</button>
+    <div class="gpos" id="gpos"></div>
+    <button data-a="gnext">Skip &rsaquo;</button>
+  </div>
+  <div class="gmid" id="gmid" data-a="gnext"></div>
+  <div class="ghint">tap anywhere to continue</div>
+  <div class="gnav" id="gnav"></div>
+</div>
+
+<nav id="nav">
+  <button data-t="now" class="on">
+    <svg viewBox="0 0 24 24"><path d="M12 3v18M7 7h10"/><circle cx="12" cy="12" r="9"/></svg>
+    <span class="lbl">Now</span>
+  </button>
+  <button data-t="pray">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M12 13v8M8.5 17h7"/></svg>
+    <span class="lbl">Pray</span>
+  </button>
+  <button data-t="season">
+    <svg viewBox="0 0 24 24"><path d="M4 5.5h16v15H4zM4 9.5h16M8 3v4M16 3v4"/></svg>
+    <span class="lbl">Season</span>
+  </button>
+</nav>
+
+<script>
+"use strict";
+
+/* ============ prayers ============ */
+var P = {
+cross:"In the name of the Father, and of the Son, and of the Holy Spirit. Amen.",
+pater:"Our Father, who art in heaven, hallowed be thy name; thy kingdom come; thy will be done on earth as it is in heaven. Give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. Amen.",
+ave:"Hail Mary, full of grace, the Lord is with thee. Blessed art thou among women, and blessed is the fruit of thy womb, Jesus.\n\nHoly Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.",
+gloria:"Glory be to the Father, and to the Son, and to the Holy Spirit. As it was in the beginning, is now, and ever shall be, world without end. Amen.",
+fatima:"O my Jesus, forgive us our sins, save us from the fires of hell, and lead all souls to heaven, especially those in most need of thy mercy.",
+creed:"I believe in God, the Father almighty, Creator of heaven and earth, and in Jesus Christ, his only Son, our Lord, who was conceived by the Holy Spirit, born of the Virgin Mary, suffered under Pontius Pilate, was crucified, died and was buried; he descended into hell; on the third day he rose again from the dead; he ascended into heaven, and is seated at the right hand of God the Father almighty; from there he will come to judge the living and the dead.\n\nI believe in the Holy Spirit, the holy catholic Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.",
+salve:"Hail, holy Queen, Mother of mercy, our life, our sweetness and our hope. To thee do we cry, poor banished children of Eve; to thee do we send up our sighs, mourning and weeping in this valley of tears.\n\nTurn then, most gracious advocate, thine eyes of mercy toward us, and after this our exile show unto us the blessed fruit of thy womb, Jesus. O clement, O loving, O sweet Virgin Mary.\n\nV. Pray for us, O holy Mother of God.\nR. That we may be made worthy of the promises of Christ.",
+morning:"O Jesus, through the Immaculate Heart of Mary, I offer You my prayers, works, joys, and sufferings of this day, in union with the Holy Sacrifice of the Mass throughout the world.\n\nI offer them for all the intentions of Your Sacred Heart: the salvation of souls, reparation for sin, and the reunion of all Christians. Amen.",
+michael:"Saint Michael the Archangel, defend us in battle. Be our protection against the wickedness and snares of the devil. May God rebuke him, we humbly pray; and do thou, O Prince of the heavenly host, by the power of God, thrust into hell Satan and all evil spirits who prowl about the world seeking the ruin of souls. Amen.",
+memorare:"Remember, O most gracious Virgin Mary, that never was it known that anyone who fled to thy protection, implored thy help, or sought thy intercession was left unaided.\n\nInspired by this confidence, I fly unto thee, O Virgin of virgins, my Mother; to thee do I come; before thee I stand, sinful and sorrowful. O Mother of the Word Incarnate, despise not my petitions, but in thy mercy hear and answer me. Amen.",
+anima:"Soul of Christ, sanctify me.\nBody of Christ, save me.\nBlood of Christ, inebriate me.\nWater from the side of Christ, wash me.\nPassion of Christ, strengthen me.\nO good Jesus, hear me.\nWithin thy wounds hide me.\nSuffer me not to be separated from thee.\nFrom the malignant enemy defend me.\nIn the hour of my death call me,\nand bid me come unto thee,\nthat with thy saints I may praise thee\nfor ever and ever. Amen.",
+contrition:"O my God, I am heartily sorry for having offended Thee, and I detest all my sins because of Thy just punishments, but most of all because they offend Thee, my God, who art all good and deserving of all my love.\n\nI firmly resolve, with the help of Thy grace, to sin no more and to avoid the near occasions of sin. Amen.",
+angelus:"V. The Angel of the Lord declared unto Mary.\nR. And she conceived of the Holy Spirit.\n\n— Hail Mary —\n\nV. Behold the handmaid of the Lord.\nR. Be it done unto me according to thy word.\n\n— Hail Mary —\n\nV. And the Word was made flesh.\nR. And dwelt among us.\n\n— Hail Mary —\n\nV. Pray for us, O holy Mother of God.\nR. That we may be made worthy of the promises of Christ.\n\nLet us pray. Pour forth, we beseech Thee, O Lord, Thy grace into our hearts, that we to whom the Incarnation of Christ Thy Son was made known by the message of an angel, may by His Passion and Cross be brought to the glory of His Resurrection. Through the same Christ our Lord. Amen.",
+regina:"Queen of Heaven, rejoice, alleluia.\nFor He whom thou didst merit to bear, alleluia.\nHath risen as He said, alleluia.\nPray for us to God, alleluia.\n\nV. Rejoice and be glad, O Virgin Mary, alleluia.\nR. For the Lord hath truly risen, alleluia.\n\nLet us pray. O God, who by the resurrection of Thy Son our Lord Jesus Christ didst vouchsafe to give joy to the world, grant, we beseech Thee, that through His Mother, the Virgin Mary, we may obtain the joys of everlasting life. Through the same Christ our Lord. Amen.",
+veni:"Come, Holy Spirit, fill the hearts of Thy faithful and kindle in them the fire of Thy love.\n\nV. Send forth Thy Spirit and they shall be created.\nR. And Thou shalt renew the face of the earth.",
+grace:"Bless us, O Lord, and these Thy gifts, which we are about to receive from Thy bounty, through Christ our Lord. Amen.",
+eternal:"Eternal Father, I offer You the Body and Blood, Soul and Divinity of Your dearly beloved Son, Our Lord Jesus Christ, in atonement for our sins and those of the whole world.",
+mercy:"For the sake of His sorrowful Passion, have mercy on us and on the whole world.",
+holygod:"Holy God, Holy Mighty One, Holy Immortal One, have mercy on us and on the whole world.",
+cloud_lift:"Lift up thine heart unto God with a meek stirring of love; and mean Himself, and none of His goods.\n\nAnd look that nothing live in thy working mind but a naked intent stretching unto God.",
+cloud_love:"He may well be loved, but not thought. By love may He be gotten and holden; but by thought never.\n\nOf God Himself can no man think. And therefore I would leave all that thing that I can think, and choose to my love that thing that I cannot think.",
+cloud_forget:"As this cloud of unknowing is above thee, betwixt thee and thy God, right so put a cloud of forgetting beneath thee, betwixt thee and all the creatures that ever be made.\n\nNot only the creatures, but all the works and the conditions of the same creatures. Yea, and the good works of God's own self.",
+cloud_word:"Take thee but a little word of one syllable, for so it is better than of two. And such a word is this word GOD, or this word LOVE.\n\nChoose thee whether thou wilt, or another as thee list, which that thee liketh best of one syllable. And fasten this word to thine heart, so that it never go thence for thing that befalleth.",
+cloud_short:"It is the shortest work of all that man may imagine.\n\nIt is neither longer nor shorter than is an atom. Beat upon this cloud of unknowing with a sharp dart of longing love, and go not thence for anything that befalleth.",
+cloud_would:"It is not what thou art, nor what thou hast been, that God beholdeth with His merciful eyes; but what thou wouldst be.",
+nunc:"Now dost thou dismiss thy servant, O Lord, according to thy word in peace;\n\nBecause my eyes have seen thy salvation, which thou hast prepared before the face of all peoples:\n\nA light to the revelation of the Gentiles, and the glory of thy people Israel.",
+subtuum:"We fly to thy patronage, O holy Mother of God; despise not our petitions in our necessities, but deliver us always from all dangers, O glorious and blessed Virgin. Amen.",
+benedictus:"Blessed be the Lord God of Israel, because he hath visited and wrought the redemption of his people;\n\nAnd hath raised up an horn of salvation to us, in the house of David his servant;\n\nTo give knowledge of salvation to his people, unto the remission of their sins:\n\nThrough the bowels of the mercy of our God, in which the Orient from on high hath visited us;\n\nTo enlighten them that sit in darkness and in the shadow of death, to direct our feet into the way of peace.",
+angelus1:"V. The Angel of the Lord declared unto Mary.\nR. And she conceived of the Holy Spirit.",
+angelus2:"V. Behold the handmaid of the Lord.\nR. Be it done unto me according to thy word.",
+angelus3:"V. And the Word was made flesh.\nR. And dwelt among us.",
+angelus4:"V. Pray for us, O holy Mother of God.\nR. That we may be made worthy of the promises of Christ.\n\nLet us pray. Pour forth, we beseech Thee, O Lord, Thy grace into our hearts, that we to whom the Incarnation of Christ Thy Son was made known by the message of an angel, may by His Passion and Cross be brought to the glory of His Resurrection. Through the same Christ our Lord. Amen.",
+regina1:"Queen of Heaven, rejoice, alleluia.\nFor He whom thou didst merit to bear, alleluia.",
+regina2:"Hath risen as He said, alleluia.\nPray for us to God, alleluia.",
+regina3:"V. Rejoice and be glad, O Virgin Mary, alleluia.\nR. For the Lord hath truly risen, alleluia.\n\nLet us pray. O God, who by the resurrection of Thy Son our Lord Jesus Christ didst vouchsafe to give joy to the world, grant, we beseech Thee, that through His Mother, the Virgin Mary, we may obtain the joys of everlasting life. Through the same Christ our Lord. Amen.",
+cdf_empty:"The emptiness God asks for is the renunciation of personal selfishness \u2014 not necessarily the renunciation of the created things He has given us, and among which He has placed us.\n\nSo: set the day down, but do not call it nothing. It was given.",
+cdf_gift:"Genuine Christian mysticism has nothing to do with technique. It is always a gift of God, and the one who receives it knows himself unworthy.\n\nThe clock is a fence around the time, not a method for producing anything. Nothing here is being achieved.",
+jesus_prayer:"Lord Jesus Christ, Son of God, have mercy on me, a sinner.",
+cloud_christ:"Look that nothing live in thy working mind but a naked intent stretching unto God \u2014 and that God is the one who was crucified, and rose.\n\nThe cloud is above you. The face is not hidden. He has one.",
+ccc_gaze:"Contemplation is a gaze of faith, fixed on Jesus.\n\nNot blankness. Not an absence of thought pursued for its own sake. A look, held on a face \u2014 and a silence in which the Word is heard rather than abolished.",
+ol_silence:"Christian apophaticism is an adoring silence before the God who is Father, Son and Holy Spirit \u2014 not absorption into an impersonal reality.\n\nThe darkness is a reverence before Someone, not a vacancy where no one is.",
+adoramus:"V. We adore You, O Christ, and we bless You.\nR. Because by Your holy Cross You have redeemed the world."
+};
+
+/* ============ mysteries ============ */
+var ORD = ["First","Second","Third","Fourth","Fifth"];
+var MYST = {
+joyful:{name:"Joyful", days:[1,6], m:[
+ {t:"The Annunciation", s:"Behold, I am the handmaid of the Lord. Let it be done to me according to thy word.", f:"Humility"},
+ {t:"The Visitation", s:"Blessed art thou among women, and blessed is the fruit of thy womb.", f:"Love of neighbour"},
+ {t:"The Nativity", s:"She wrapped him in swaddling clothes and laid him in a manger, because there was no room for them in the inn.", f:"Poverty of spirit"},
+ {t:"The Presentation", s:"A sword shall pierce through thy own soul also.", f:"Obedience"},
+ {t:"The Finding in the Temple", s:"Did you not know that I must be about my Father's business?", f:"Joy in finding Christ"}]},
+sorrowful:{name:"Sorrowful", days:[2,5], m:[
+ {t:"The Agony in the Garden", s:"Father, if thou be willing, remove this cup from me; nevertheless not my will, but thine, be done.", f:"Sorrow for sin"},
+ {t:"The Scourging at the Pillar", s:"He was wounded for our transgressions, he was bruised for our iniquities.", f:"Purity"},
+ {t:"The Crowning with Thorns", s:"And platting a crown of thorns, they put it upon his head.", f:"Moral courage"},
+ {t:"The Carrying of the Cross", s:"If any man will come after me, let him deny himself, and take up his cross daily.", f:"Patience"},
+ {t:"The Crucifixion", s:"Father, into thy hands I commend my spirit.", f:"Perseverance"}]},
+glorious:{name:"Glorious", days:[0,3], m:[
+ {t:"The Resurrection", s:"He is not here, for he is risen, as he said.", f:"Faith"},
+ {t:"The Ascension", s:"And he was taken up into heaven, and sitteth on the right hand of God.", f:"Hope"},
+ {t:"The Descent of the Holy Spirit", s:"And there appeared unto them cloven tongues like as of fire.", f:"Love of God"},
+ {t:"The Assumption", s:"Thou art all fair, my love; there is no spot in thee.", f:"Devotion to Mary"},
+ {t:"The Coronation", s:"A woman clothed with the sun, and the moon under her feet, and upon her head a crown of twelve stars.", f:"Eternal happiness"}]},
+luminous:{name:"Luminous", days:[4], m:[
+ {t:"The Baptism in the Jordan", s:"This is my beloved Son, in whom I am well pleased.", f:"Openness to the Spirit"},
+ {t:"The Wedding at Cana", s:"Whatsoever he saith unto you, do it.", f:"To Jesus through Mary"},
+ {t:"The Proclamation of the Kingdom", s:"Repent, and believe the gospel.", f:"Trust in God"},
+ {t:"The Transfiguration", s:"His face did shine as the sun, and his raiment was white as the light.", f:"Desire for holiness"},
+ {t:"The Institution of the Eucharist", s:"This is my body, which is given for you: this do in remembrance of me.", f:"Adoration"}]}
+};
+function mysteryForDay(dow){
+  for(var k in MYST){ if(MYST[k].days.indexOf(dow)>=0) return k; }
+  return "glorious";
+}
+
+/* ============ stations ============ */
+var STATIONS = [
+ ["Jesus is condemned to death","Pilate, willing to content the people, delivered Jesus, when he had scourged him, to be crucified."],
+ ["Jesus takes up His cross","And he bearing his cross went forth into a place called the place of a skull."],
+ ["Jesus falls the first time","Surely he hath borne our griefs, and carried our sorrows."],
+ ["Jesus meets His Mother","Is it nothing to you, all ye that pass by?"],
+ ["Simon helps carry the cross","And they compelled one Simon a Cyrenian to bear his cross."],
+ ["Veronica wipes the face of Jesus","He hath no form nor comeliness; and when we shall see him, there is no beauty that we should desire him."],
+ ["Jesus falls the second time","But I am a worm, and no man; a reproach of men, and despised of the people."],
+ ["Jesus meets the women of Jerusalem","Daughters of Jerusalem, weep not for me, but weep for yourselves, and for your children."],
+ ["Jesus falls the third time","He was oppressed, and he was afflicted, yet he opened not his mouth."],
+ ["Jesus is stripped of His garments","They parted my garments among them, and upon my vesture did they cast lots."],
+ ["Jesus is nailed to the cross","Father, forgive them; for they know not what they do."],
+ ["Jesus dies on the cross","It is finished: and he bowed his head, and gave up the ghost."],
+ ["Jesus is taken down from the cross","And Joseph took the body, and wrapped it in a clean linen cloth."],
+ ["Jesus is laid in the tomb","And laid it in his own new tomb, which he had hewn out in the rock."]
+];
+
+/* ============ examen ============ */
+var EXAMEN = [
+ ["Give thanks","Before anything else, name three things from today you are grateful for. Small ones count — they count more, usually. Do not rush this step; it is the one that sets the tone for the rest."],
+ ["Ask for light","Ask the Holy Spirit to show you the day as God saw it, not as your mood reports it. You are looking for what was actually there, not for a verdict on yourself."],
+ ["Review the day","Walk through it from waking to now. Where was God present? Where did you turn away? Notice without arguing. The review is observation, not prosecution."],
+ ["Ask forgiveness","Name what needs naming. Make an Act of Contrition. If something belongs in confession, note it and leave it there until then."],
+ ["Look to tomorrow","One thing — not a list. What is the single place tomorrow where you will need grace? Ask for it now, and stop."],
+ ["The unsaid","Name one thing you claimed to know today that you did not know. Do not resolve it, act on it, or turn it into a resolution. Note it and stop."]
+];
+
+/* ============ liturgical calendar ============ */
+function addDays(d,n){ var x=new Date(d.getTime()); x.setDate(x.getDate()+n); return x; }
+function dayOnly(d){ return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
+function easter(y){
+  var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,
+      f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,
+      i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),
+      mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;
+  return new Date(y,mo-1,da);
+}
+function adventStart(y){
+  var c=new Date(y,11,25), dow=c.getDay();
+  return addDays(addDays(c, -(dow===0?7:dow)), -21);
+}
+function baptism(y){
+  var e=new Date(y,0,6), dow=e.getDay();
+  return addDays(e, dow===0 ? 7 : (7-dow));
+}
+/* the solemnities that can land on a Friday and lift the abstinence */
+function solemnity(d, E){
+  var m = d.getMonth()+1, dd = d.getDate();
+  var fixed = {"1-1":"Mary, Mother of God","3-19":"Saint Joseph","3-25":"The Annunciation",
+               "6-24":"Nativity of John the Baptist","6-29":"Saints Peter and Paul",
+               "8-15":"The Assumption","11-1":"All Saints","12-8":"The Immaculate Conception",
+               "12-25":"The Nativity"};
+  var k = m+"-"+dd;
+  if(fixed[k]) return fixed[k];
+  /* Sacred Heart is always a Friday: Easter + 68 */
+  if(d.getTime() === addDays(E,68).getTime()) return "The Sacred Heart";
+  if(d.getTime() === addDays(E,60).getTime()) return "Corpus Christi";
+  return null;
+}
+
+function lit(d){
+  d = dayOnly(d);
+  var y = d.getFullYear();
+  var E = easter(y), ash = addDays(E,-46), palm = addDays(E,-7),
+      thu = addDays(E,-3), pent = addDays(E,49),
+      adv = adventStart(y), bap = baptism(y);
+  var o = {date:d, dow:d.getDay(), easter:E, ash:ash, pent:pent, advent:adv};
+  o.solemnity = solemnity(d, E);
+
+  if(d >= adv && d < new Date(y,11,25)){
+    o.season="Advent"; o.color="violet";
+    var wk = Math.floor((d-adv)/604800000)+1;
+    o.name = "Week "+wk+" of Advent";
+    if(wk===3) o.color="rose", o.name="Gaudete — Week 3 of Advent";
+  } else if(d >= new Date(y,11,25) || d < bap){
+    o.season="Christmas"; o.color="white"; o.name="Christmas season";
+  } else if(d >= ash && d < thu){
+    o.season="Lent"; o.color="violet";
+    var lent1 = addDays(ash,4);                 /* Ash Wednesday is always a Wednesday */
+    var lw = d < lent1 ? 0 : Math.floor((d-lent1)/604800000)+1;
+    o.name = d>=palm ? "Holy Week" : lw===0 ? "After Ash Wednesday" : "Week "+lw+" of Lent";
+    if(d.getTime()===ash.getTime()) o.name="Ash Wednesday";
+    if(lw===4 && d.getDay()===0) o.color="rose", o.name="Laetare Sunday";
+    if(d>=palm) o.color="red";
+  } else if(d >= thu && d < E){
+    o.season="Triduum"; o.color="red";
+    o.name = d.getTime()===thu.getTime() ? "Holy Thursday"
+           : d.getTime()===addDays(E,-2).getTime() ? "Good Friday" : "Holy Saturday";
+  } else if(d >= E && d <= pent){
+    o.season="Easter"; o.color="white";
+    var ew = Math.floor((d-E)/604800000)+1;
+    o.name = d.getTime()===E.getTime() ? "Easter Sunday"
+           : d.getTime()===pent.getTime() ? "Pentecost" : "Week "+ew+" of Easter";
+    if(d.getTime()===pent.getTime()) o.color="red";
+  } else {
+    o.season="Ordinary Time"; o.color="green";
+    var wk2;
+    if(d < ash){ wk2 = Math.floor((d-bap)/604800000)+1; }
+    else { wk2 = 35 - Math.ceil((adv-d)/604800000); }
+    o.name = "Week "+Math.max(1,Math.min(34,wk2))+" of Ordinary Time";
+  }
+
+  /* what binds, and what the Rule adds */
+  o.binds = [];
+  if(d.getTime()===ash.getTime()) o.binds.push(["Fast + abstain","Ash Wednesday. One full meal, two smaller that together do not equal it. No meat."]);
+  if(d.getTime()===addDays(E,-2).getTime()) o.binds.push(["Fast + abstain","Good Friday. The whole Church stops; there is no Mass. Rest, or walk the Stations."]);
+  if(d.getDay()===5 && o.solemnity){
+    o.binds.push(["No abstinence","" + o.solemnity + " — a solemnity. Friday abstinence does not bind today."]);
+  } else if(o.season==="Lent" && d.getDay()===5){
+    o.binds.push(["Abstain","Friday of Lent — no meat. No substitution is permitted on these."]);
+  } else if(d.getDay()===5){
+    o.binds.push(["Abstain","Canon 1251 prescribes abstinence every Friday of the year. Outside Lent the US bishops permit another penance in its place — but some Friday penance always binds."]);
+  }
+  if(d.getDay()===0) o.binds.push(["Never fast","The Lord's Day. Eat well, and without guilt — the feast is built into the calendar as deliberately as the fast."]);
+  if(d.getDay()===3 && o.season!=="Easter") o.rule = "Wednesday — the day of the betrayal, and an ancient fast day attested in the Didache.";
+
+  return o;
+}
+var COLORS = {
+  violet:{a:"#5b3b6e", d:"#b592cc", n:"Violet"},
+  rose:  {a:"#9c4f6b", d:"#dba0bb", n:"Rose"},
+  white: {a:"#8a6d2b", d:"#d8b566", n:"White & gold"},
+  red:   {a:"#8a2f2f", d:"#d98585", n:"Red"},
+  green: {a:"#3c6340", d:"#88bb8e", n:"Green"}
+};
+function paint(c){
+  var k = COLORS[c] || COLORS.green;
+  var dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.style.setProperty("--accent", dark ? k.d : k.a);
+}
+
+/* ============ guided sequences ============ */
+function buildRosary(setKey){
+  var set = MYST[setKey], s = [];
+  s.push({k:"ttl", t:"Begin", p:P.cross});
+  s.push({k:"p", t:"The Apostles' Creed", p:P.creed});
+  s.push({k:"p", t:"Our Father", p:P.pater});
+  ["faith","hope","charity"].forEach(function(v,i){
+    s.push({k:"ave", t:"Hail Mary", p:P.ave, sub:"For an increase in "+v, n:i+1, of:3});
+  });
+  s.push({k:"p", t:"Glory Be", p:P.gloria});
+  set.m.forEach(function(m,di){
+    s.push({k:"myst", t:ORD[di]+" "+set.name+" Mystery", myst:m.t, scr:m.s, sub:"Fruit of the mystery: "+m.f, dec:di+1});
+    s.push({k:"p", t:"Our Father", p:P.pater, dec:di+1});
+    for(var i=1;i<=10;i++) s.push({k:"ave", t:"Hail Mary", p:P.ave, n:i, of:10, dec:di+1});
+    s.push({k:"p", t:"Glory Be", p:P.gloria, dec:di+1});
+    s.push({k:"p", t:"Fatima Prayer", p:P.fatima, dec:di+1});
+  });
+  s.push({k:"p", t:"Hail Holy Queen", p:P.salve});
+  s.push({k:"p", t:"Saint Michael", p:P.michael});
+  s.push({k:"ttl", t:"Conclude", p:P.cross});
+  return s;
+}
+function buildChaplet(){
+  var s = [];
+  s.push({k:"ttl", t:"Begin", p:P.cross});
+  s.push({k:"p", t:"Our Father", p:P.pater});
+  s.push({k:"p", t:"Hail Mary", p:P.ave});
+  s.push({k:"p", t:"The Apostles' Creed", p:P.creed});
+  for(var d=1; d<=5; d++){
+    s.push({k:"p", t:"On the Our Father bead", p:P.eternal, dec:d});
+    for(var i=1;i<=10;i++) s.push({k:"ave", t:"On the Hail Mary beads", p:P.mercy, n:i, of:10, dec:d});
+  }
+  for(var j=1;j<=3;j++) s.push({k:"ave", t:"Three times", p:P.holygod, n:j, of:3});
+  s.push({k:"ttl", t:"Conclude", p:P.cross});
+  return s;
+}
+function buildStations(){
+  var s = [{k:"ttl", t:"Begin", p:P.cross+"\n\nAn act of contrition, and the intention you are walking for."}];
+  STATIONS.forEach(function(x,i){
+    s.push({k:"myst", t:"Station "+(i+1), myst:x[0], scr:x[1], sub:P.adoramus, dec:Math.ceil((i+1)/3)});
+  });
+  s.push({k:"p", t:"Conclude", p:P.pater});
+  s.push({k:"ttl", t:"Conclude", p:P.cross});
+  return s;
+}
+function buildExamen(){
+  var s = [{k:"ttl", t:"Begin", p:P.cross+"\n\nFive minutes. No notebook, no list, no audit of the practice itself."}];
+  EXAMEN.forEach(function(x,i){
+    s.push({k:"myst", t:"Step "+(i+1), myst:x[0], scr:x[1], dec:i+1});
+  });
+  s.push({k:"p", t:"Act of Contrition", p:P.contrition});
+  s.push({k:"ttl", t:"Conclude", p:P.cross});
+  return s;
+}
+
+
+/* ---- the word, per Cloud ch. 7 ---- */
+function theWord(){ return (ST.word || "GOD").toUpperCase(); }
+
+function buildMorning(){
+  var W = theWord();
+  return [
+    {k:"ttl", t:"Begin", p:P.cross},
+    {k:"myst", t:"The Cloud, chapter 3", myst:"A meek stirring of love", scr:P.cloud_lift,
+     sub:"Not a thought about God. A reaching toward Him."},
+    {k:"p", t:"Morning Offering", p:P.morning},
+    {k:"myst", t:"The Cloud, chapter 7", myst:"Your word is "+W, scr:P.cloud_word,
+     sub:"Fasten it to your heart. When anything else rises — good thoughts included — answer it with this word and nothing more."},
+    {k:"sil", t:"The work", sil:120, word:W,
+     sub:"Say it inwardly. When you notice you have wandered, return. Noticing is the return. Nothing is being achieved."},
+    {k:"p", t:"Our Father", p:P.pater},
+    {k:"myst", t:"Canticle of Zechariah", myst:"Benedictus", scr:P.benedictus},
+    {k:"ttl", t:"Go", p:P.cross}
+  ];
+}
+
+function buildEvening(){
+  var W = theWord();
+  return [
+    {k:"ttl", t:"Begin", p:P.cross},
+    {k:"myst", t:"Canticle of Simeon", myst:"Nunc Dimittis", scr:P.nunc,
+     sub:"The day is finished whether or not you finished it."},
+    {k:"myst", t:"The Cloud, chapter 7", myst:"The cloud of forgetting", scr:P.cloud_forget,
+     sub:"Put the day beneath you — the calls, the arguments, the things undone. Not denied. Set down."},
+    {k:"myst", t:"Orationis Formas §19", myst:"But not into nothing", scr:P.cdf_empty,
+     sub:"The Church's own qualification on the chapter you just read. The Cloud is strong medicine; this is the label on the bottle."},
+    {k:"myst", t:"The Cloud, chapter 6", myst:"By love, not by thought", scr:P.cloud_love,
+     sub:"You have spent the day knowing things. This is the hour for the other faculty."},
+    {k:"myst", t:"Catechism 2715", myst:"A gaze of faith", scr:P.ccc_gaze,
+     sub:"Say the Jesus Prayer once, slowly, and let it stand under everything that follows: " + P.jesus_prayer},
+    {k:"sil", t:"The work", sil:300, word:W,
+     sub:"Longer than the morning. The Cloud calls it short work even so — shorter than an atom, repeated. Nothing is being produced here."},
+    {k:"myst", t:"Orationis Formas §23", myst:"Not a technique", scr:P.cdf_gift,
+     sub:"If the silence went badly, nothing failed. If it went well, you did not do it."},
+    {k:"myst", t:"Orientale Lumen §16", myst:"Before Someone", scr:P.ol_silence,
+     sub:"John Paul II, on what the darkness is and is not."},
+    {k:"myst", t:"The unsaid", myst:"One thing you did not know",
+     scr:"Name one thing you claimed to know today that you did not know.",
+     sub:"Do not resolve it, act on it, or turn it into a resolution for tomorrow. Note it and stop."},
+    {k:"myst", t:"The Cloud, chapter 34", myst:"What thou wouldst be", scr:P.cloud_would,
+     sub:"Before the act of contrition, and the reason it is possible."},
+    {k:"p", t:"Act of Contrition", p:P.contrition},
+    {k:"p", t:"Sub Tuum Praesidium", p:P.subtuum},
+    {k:"ttl", t:"Rest", p:P.cross}
+  ];
+}
+
+function buildAngelus(){
+  var L = lit(new Date());
+  if(L.season === "Easter"){
+    return [
+      {k:"ttl", t:"Regina Caeli", p:"In Eastertide the Angelus gives way to this. Said standing, not kneeling — the season does not kneel."},
+      {k:"p", t:"", p:P.regina1},
+      {k:"p", t:"", p:P.regina2},
+      {k:"p", t:"", p:P.regina3},
+      {k:"ttl", t:"Amen", p:P.cross}
+    ];
+  }
+  return [
+    {k:"p", t:"The Angelus", p:P.angelus1},
+    {k:"p", t:"Hail Mary", p:P.ave},
+    {k:"p", t:"", p:P.angelus2},
+    {k:"p", t:"Hail Mary", p:P.ave},
+    {k:"p", t:"", p:P.angelus3},
+    {k:"p", t:"Hail Mary", p:P.ave},
+    {k:"p", t:"", p:P.angelus4},
+    {k:"ttl", t:"Amen", p:P.cross}
+  ];
+}
+
+/* next bell — 6am, noon, 6pm */
+var BELLS = [[6,"Six"],[12,"Noon"],[18,"Six"]];
+function nextBell(){
+  var n = new Date(), h = n.getHours(), m = n.getMinutes();
+  for(var i=0;i<BELLS.length;i++){
+    if(h < BELLS[i][0] || (h===BELLS[i][0] && m < 3)) {
+      var mins = (BELLS[i][0]-h)*60 - m;
+      return {label:BELLS[i][1], mins:mins, now:(h===BELLS[i][0])};
+    }
+  }
+  return {label:"Six", mins:(24-h+6)*60-m, now:false};
+}
+function bellText(){
+  var b = nextBell();
+  if(b.now) return "Now";
+  if(b.mins < 60) return b.mins+" min";
+  return Math.round(b.mins/60)+" hr";
+}
+
+var SETS = {
+  morning:  {name:"Morning Prayer", dur:"~5 min", tag:"On rising", build:buildMorning},
+  evening:  {name:"Evening Prayer", dur:"~12 min", tag:"Nightfall &middot; the Cloud", build:buildEvening},
+  angelus:  {name:"The Angelus", dur:"90 sec", tag:"Six, noon, six", build:buildAngelus},
+  rosary:   {name:"The Rosary", dur:"~20 min", tag:"Marian", build:function(){ return buildRosary(ST.myst||mysteryForDay(new Date().getDay())); }},
+  chaplet:  {name:"Divine Mercy Chaplet", dur:"~8 min", tag:"Three o'clock", build:buildChaplet},
+  stations: {name:"Stations of the Cross", dur:"~25 min", tag:"Fridays & Lent", build:buildStations},
+  examen:   {name:"The Examen", dur:"~5 min", tag:"Nightfall", build:buildExamen}
+};
+var LIB = [
+  ["Morning Offering","morning","On rising, before anything else."],
+  ["The Angelus","angelus","Six, noon, and six. Outside Eastertide."],
+  ["Regina Caeli","regina","Replaces the Angelus from Easter to Pentecost."],
+  ["Prayer to St. Michael","michael","After Mass, or whenever the day turns."],
+  ["The Memorare","memorare","When you have run out of your own words."],
+  ["Anima Christi","anima","After Communion."],
+  ["Act of Contrition","contrition","In confession, and nightly."],
+  ["Come, Holy Spirit","veni","Before work that needs more than you have."],
+  ["Grace Before Meals","grace","At table."],
+  ["The Apostles' Creed","creed",""],
+  ["Hail Holy Queen","salve","Closing the Rosary."]
+];
+
+/* ============ state ============ */
+var ST = {tab:"now", myst:null, word:"GOD"};
+try{ var _w = localStorage.getItem("oratory.word"); if(_w) ST.word = _w; }catch(e){}
+function saveWord(w){ ST.word = w; try{ localStorage.setItem("oratory.word", w); }catch(e){} }
+var G = {on:false, id:null, i:0, steps:[], sec:0, iv:null, run:false};
+var actx=null;
+function chime(n){
+  try{
+    if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    for(var i=0;i<(n||1);i++){
+      var o=actx.createOscillator(), g=actx.createGain();
+      o.connect(g); g.connect(actx.destination);
+      o.type="sine"; o.frequency.value = 528;
+      var t=actx.currentTime+i*0.9;
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(0.22,t+0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.85);
+      o.start(t); o.stop(t+0.9);
+    }
+  }catch(e){}
+}
+function mmss(x){ x=Math.max(0,Math.round(x)); return Math.floor(x/60)+":"+("0"+(x%60)).slice(-2); }
+function gStop(){ if(G.iv){clearInterval(G.iv); G.iv=null;} G.run=false; }
+function gTick(){
+  G.sec--;
+  var el=document.getElementById("silclock");
+  if(el) el.textContent = mmss(G.sec);
+  if(G.sec<=0){ gStop(); chime(2); gGo(1); }
+}
+function silToggle(){
+  if(G.run){ gStop(); }
+  else { G.run=true; chime(1); G.iv=setInterval(gTick,1000); }
+  gRender();
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c];}); }
+
+/* ============ views ============ */
+function suggest(){
+  var now = new Date(), h = now.getHours(), dow = now.getDay(), L = lit(now);
+  var b = nextBell();
+  if(b.now) return {id:"set", k:"angelus", why:"The bell"};
+  if(h < 10) return {id:"set", k:"morning", why:"On rising"};
+  if(h >= 11 && h < 13) return {id:"set", k:"angelus", why:"Noon"};
+  if(h >= 15 && h < 16) return {id:"set", k:"chaplet", why:"The hour of mercy"};
+  if(dow === 5 && h >= 12) return {id:"set", k:"stations", why:"Friday"};
+  if(L.season === "Lent" && h >= 12 && h < 17) return {id:"set", k:"stations", why:"Lent"};
+  if(h >= 20) return {id:"set", k:"evening", why:"Nightfall"};
+  return {id:"set", k:"rosary", why:"Evening"};
+}
+function vNow(){
+  var L = lit(new Date()), g = suggest();
+  var h = "";
+  if(g.id === "set"){
+    var s = SETS[g.k];
+    h += '<div class="card" style="border-color:var(--accent)">'+
+      '<h2 style="color:var(--accent)">'+esc(g.why)+'</h2>'+
+      '<div class="big">'+esc(s.name)+'</div>'+
+      '<div class="sub" style="margin:4px 0 13px">'+esc(s.dur)+
+      (g.k==="rosary" ? ' &middot; '+esc(MYST[mysteryForDay(L.dow)].name)+' Mysteries' : '')+'</div>'+
+      '<button class="btn" data-a="go" data-i="'+g.k+'">Begin</button></div>';
+  } else {
+    var nm = LIB.filter(function(x){return x[1]===g.k;})[0];
+    h += '<div class="card" style="border-color:var(--accent)">'+
+      '<h2 style="color:var(--accent)">'+esc(g.why)+'</h2>'+
+      '<div class="big" style="margin-bottom:11px">'+esc(nm?nm[0]:"")+'</div>'+
+      '<div class="pray">'+esc(P[g.k])+'</div></div>';
+  }
+
+  var b = nextBell();
+  h += '<div class="card"><div class="row sb">'+
+    '<div><h2 style="margin:0 0 3px">'+(b.now?"The bell":"Next bell")+'</h2>'+
+    '<div class="sub">'+esc(b.label)+(L.season==="Easter"?" &middot; Regina Caeli":"")+'</div></div>'+
+    '<div style="text-align:right"><div class="big" style="font-size:21px;color:var(--accent)">'+esc(bellText())+'</div></div>'+
+    '</div>'+
+    '<button class="btn" data-a="go" data-i="angelus" style="margin-top:11px">Pray it &mdash; 90 seconds</button>'+
+    '<div class="row" style="gap:8px;margin-top:8px">'+
+      '<button class="btn ghost sm grow" data-a="ring">Ring the bell</button>'+
+      '<button class="btn ghost sm grow" data-a="ics">Set reminders</button>'+
+    '</div>'+
+    '<div class="note">Three a day, ninety seconds each. This is the rep &mdash; everything else is built on it. '+
+    '<b>Set reminders</b> adds three daily alerts to your calendar, which fire whether or not this app is open.</div></div>';
+
+  h += '<div class="card"><h2>Today</h2>'+
+    '<div class="big" style="font-size:19px">'+esc(L.name)+'</div>'+
+    '<div class="sub" style="margin-top:3px">'+esc(L.season)+' &middot; '+esc((COLORS[L.color]||{}).n||"")+'</div>';
+  if(L.binds.length || L.rule){
+    h += '<div style="margin-top:12px">';
+    L.binds.forEach(function(b){ h += '<div class="bind"><b>'+esc(b[0])+'</b><div class="grow sub">'+esc(b[1])+'</div></div>'; });
+    if(L.rule) h += '<div class="bind"><b>The Rule</b><div class="grow sub">'+esc(L.rule)+'</div></div>';
+    h += '</div>';
+  }
+  h += '</div>';
+
+  h += '<button class="btn ghost sm" data-a="tab" data-t="pray">Something else</button>';
+  return h;
+}
+function vPray(){
+  var L = lit(new Date());
+  var h = '<div class="card"><h2>Your word</h2>'+
+    '<div class="sub" style="margin-bottom:11px">The Cloud asks for one syllable, fastened to the heart, '+
+    'and used to answer everything that rises &mdash; including the good thoughts. It appears in both offices.</div>'+
+    '<div class="row" style="gap:8px">'+
+    ["GOD","LOVE","HELP"].map(function(w){
+      return '<button class="btn '+(theWord()===w?'':'ghost ')+'sm grow" data-a="word" data-w="'+w+'">'+w+'</button>';
+    }).join('')+'</div>'+
+    '<div class="note">Chosen once and kept. This is the only thing the app stores.</div></div>'+
+
+    '<div class="card"><h2>Mysteries</h2>'+
+    '<label for="ms">Today is '+esc(MYST[mysteryForDay(L.dow)].name)+'</label>'+
+    '<select id="ms" data-a="ms">'+
+    Object.keys(MYST).map(function(k){
+      var sel = (ST.myst||mysteryForDay(L.dow))===k ? " selected" : "";
+      return '<option value="'+k+'"'+sel+'>'+MYST[k].name+' Mysteries</option>';
+    }).join("")+'</select>'+
+    '<div class="note">Traditionally Joyful on Monday and Saturday, Sorrowful on Tuesday and Friday, Glorious on Wednesday and Sunday, Luminous on Thursday.</div></div>';
+
+  h += Object.keys(SETS).map(function(k){
+    var s = SETS[k];
+    return '<details class="it"><summary>'+
+      '<div class="grow"><div class="tag">'+esc(s.tag)+'</div><div class="nm">'+esc(s.name)+'</div></div>'+
+      '<div class="dur">'+esc(s.dur)+'</div></summary>'+
+      '<div class="itb">'+
+      '<button class="btn" data-a="go" data-i="'+k+'">Begin</button>'+
+      '</div></details>';
+  }).join("");
+
+  h += '<div class="card" style="margin-top:16px"><h2>Prayers</h2></div>';
+  h += LIB.map(function(x){
+    return '<details class="it"><summary>'+
+      '<div class="grow"><div class="nm">'+esc(x[0])+'</div>'+
+      (x[2] ? '<div class="tag" style="margin-top:3px">'+esc(x[2])+'</div>' : '')+'</div></summary>'+
+      '<div class="itb"><div class="pray">'+esc(P[x[1]])+'</div></div></details>';
+  }).join("");
+  return h;
+}
+function vSeason(){
+  var L = lit(new Date()), y = L.date.getFullYear();
+  var rows = [
+    ["Ash Wednesday", L.ash],
+    ["Good Friday", addDays(L.easter,-2)],
+    ["Easter Sunday", L.easter],
+    ["Pentecost", L.pent],
+    ["Advent begins", L.advent],
+    ["Christmas", new Date(y,11,25)]
+  ].sort(function(a,b){ return a[1]-b[1]; });
+  var fmt = function(d){ return d.toLocaleDateString([], {month:"long", day:"numeric"}); };
+  var now = dayOnly(new Date());
+
+  var h = '<div class="card"><h2>'+y+'</h2>'+
+    rows.map(function(r){
+      var past = r[1] < now;
+      return '<div class="bind"'+(past?' style="opacity:.42"':'')+'>'+
+        '<b style="flex:0 0 118px">'+esc(fmt(r[1]))+'</b>'+
+        '<div class="grow sub">'+esc(r[0])+'</div></div>';
+    }).join("")+'</div>';
+
+  h += '<div class="card"><h2>What binds</h2>'+
+    '<div class="bind"><b>Fast + abstain</b><div class="grow sub">Ash Wednesday and Good Friday. One full meal, plus two smaller that together do not equal a full one. Nothing between meals; liquids are permitted.</div></div>'+
+    '<div class="bind"><b>Abstain</b><div class="grow sub">Canon 1251 prescribes abstinence <b>every Friday of the year</b>, unless that Friday is a solemnity. In the United States the bishops permit another penance in its place outside Lent &mdash; but the Fridays of Lent admit no substitution, and some Friday penance always binds.</div></div>'+
+    '<div class="bind"><b>Fasting binds</b><div class="grow sub">Age 18 through the start of the 60th year.</div></div>'+
+    '<div class="bind"><b>Abstinence</b><div class="grow sub">Age 14 onward.</div></div>'+
+    '<div class="bind"><b>Before Communion</b><div class="grow sub">One hour before <i>receiving</i> &mdash; not before Mass begins. Water and medicine excepted. The elderly, the sick, and those caring for them are not bound.</div></div>'+
+    '<div class="note">Canons 1249&ndash;1253 and 919. Outside Lent the US bishops permit another penance in place of Friday abstinence &mdash; but some Friday penance always binds.</div></div>';
+
+  h += '<div class="card"><h2>The older discipline</h2><div class="sub">'+
+    'Before <i>Paenitemini</i> (1966) a Catholic fasted all forty days of Lent, on the quarterly Ember Days, and on the vigils of major feasts; '+
+    'abstained from meat every Friday of the year; and kept the Eucharistic fast from midnight. '+
+    'The current binding minimum is two days a year. Voluntarily adding to it is not extremism &mdash; it is approaching what your great-grandparents did without comment.'+
+    '</div></div>';
+
+  h += '<div class="card"><h2>On the Cloud</h2><div class="sub">'+
+    'The evening office is built on <i>The Cloud of Unknowing</i>, which the CDF names by title in '+
+    '<i>Orationis Formas</i> (1989) &mdash; not to condemn it, but because it is the text most often misused. '+
+    'Two of its cautions are built into the office itself.'+
+    '<br><br>'+
+    '&sect;19: the emptiness God asks for is renunciation of selfishness, not of the creatures He gave us. '+
+    'The cloud of forgetting sets the day down; it does not call the day nothing.'+
+    '<br><br>'+
+    '&sect;23: genuine Christian mysticism has nothing to do with technique &mdash; it is always a gift. '+
+    'The word, the clock and the chime are a fence around the time, not a method that produces anything. '+
+    'Teresa of Avila put the practical half of it best: the very care taken not to think about anything '+
+    'will set the mind thinking a great deal.'+
+    '<br><br>'+
+    'And the anchors: the Catechism (2715) calls contemplation a gaze of faith fixed on Jesus &mdash; not blankness. '+
+    '<i>Orientale Lumen</i> (16) calls Christian apophaticism an adoring silence before Father, Son and Holy Spirit, '+
+    'not absorption into an impersonal reality. The cloud is above you; the face is not hidden. He has one.'+
+    '</div></div>';
+
+  h += '<div class="card"><h2>The bell</h2><div class="sub">'+
+    'The Angelus was never kept by remembering. A bell rang from a tower at six, at noon, and at six, '+
+    'and whoever heard it stopped. The call came from outside the one praying, and nothing recorded who answered.'+
+    '<br><br>'+
+    'This app rings on the hour while it is open, and the calendar reminders ring when it is not. '+
+    'Neither one keeps score. That is the arrangement, and it is older than the alternative.'+
+    '</div></div>';
+
+  h += '<div class="card"><h2>On keeping no record</h2><div class="sub">'+
+    'This app holds your place and tells you what day it is. It does not count, score, or remember. '+
+    'A streak would make the ninth day feel like a loss rather than the ninth day, and the tradition is blunt about where that leads: '+
+    'vainglory attacks precisely the man who succeeds at the practice. <i>When you fast, do not look dismal.</i>'+
+    '</div></div>';
+  return h;
+}
+
+function render(){
+  document.getElementById("view").innerHTML =
+    ST.tab==="now" ? vNow() : ST.tab==="pray" ? vPray() : vSeason();
+  var n = document.getElementById("nav").children;
+  for(var i=0;i<n.length;i++) n[i].classList.toggle("on", n[i].dataset.t===ST.tab);
+  var L = lit(new Date());
+  document.getElementById("lday").textContent =
+    L.date.toLocaleDateString([], {weekday:"long", month:"long", day:"numeric"});
+  paint(L.color);
+  window.scrollTo(0,0);
+}
+
+/* ============ the bell ============
+   A struck bell is inharmonic: hum, prime, tierce (a minor third),
+   quint and nominal, each decaying at its own rate. Sine partials
+   layered on those ratios get close to a tower bell. */
+var audioReady = false;
+function ensureAudio(){
+  try{
+    if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state === "suspended") actx.resume();
+    audioReady = true;
+  }catch(e){}
+  return audioReady;
+}
+var PARTIALS = [[0.50,0.55,4.2],[1.00,1.00,3.2],[1.19,0.52,2.1],
+                [1.50,0.34,1.6],[2.00,0.28,1.3],[2.50,0.17,0.9],[3.01,0.12,0.7]];
+function strike(t0, f, vol){
+  PARTIALS.forEach(function(q){
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = "sine"; o.frequency.value = f * q[0];
+    o.connect(g); g.connect(actx.destination);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(vol * q[1], t0 + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + q[2]);
+    o.start(t0); o.stop(t0 + q[2] + 0.05);
+  });
+}
+/* three, three, three, then a peal of nine */
+function ringAngelus(){
+  if(!ensureAudio()) return;
+  var t = actx.currentTime + 0.05, f = 262;
+  [3,3,3].forEach(function(n){
+    for(var i=0;i<n;i++){ strike(t, f, 0.22); t += 1.5; }
+    t += 1.8;
+  });
+  for(var j=0;j<9;j++){ strike(t, f*(j%2?1.0:0.998), 0.19); t += 0.72; }
+}
+function ringOnce(){ if(ensureAudio()) strike(actx.currentTime+0.03, 262, 0.22); }
+
+/* while the app is open, ring on the hour */
+var rungAt = null;
+function watchBell(){
+  var n = new Date(), h = n.getHours(), m = n.getMinutes();
+  var stamp = n.toDateString()+":"+h;
+  if(m === 0 && [6,12,18].indexOf(h) >= 0 && rungAt !== stamp && audioReady){
+    rungAt = stamp; ringAngelus();
+    if(ST.tab === "now") render();
+  }
+}
+setInterval(watchBell, 20000);
+
+/* three daily reminders iOS fires with the app shut */
+function angelusICS(){
+  var pad = function(x){ return ("0"+x).slice(-2); };
+  var n = new Date();
+  var stamp = n.getUTCFullYear()+pad(n.getUTCMonth()+1)+pad(n.getUTCDate())+"T"+
+              pad(n.getUTCHours())+pad(n.getUTCMinutes())+pad(n.getUTCSeconds())+"Z";
+  var start = n.getFullYear()+pad(n.getMonth()+1)+pad(n.getDate());
+  var tz = "";
+  try{ tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; }catch(e){}
+  var tzs = tz ? ";TZID="+tz : "";
+  var ev = [["0600","The Angel of the Lord declared unto Mary."],
+            ["1200","Behold the handmaid of the Lord."],
+            ["1800","And the Word was made flesh."]];
+  var L = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Oratory//Angelus//EN",
+           "CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Angelus"];
+  ev.forEach(function(e,i){
+    L = L.concat([
+      "BEGIN:VEVENT",
+      "UID:angelus-"+i+"-"+start+"@oratory",
+      "DTSTAMP:"+stamp,
+      "DTSTART"+tzs+":"+start+"T"+e[0]+"00",
+      "DURATION:PT2M",
+      "RRULE:FREQ=DAILY",
+      "SUMMARY:Angelus",
+      "DESCRIPTION:"+e[1],
+      "BEGIN:VALARM","TRIGGER:PT0M","ACTION:DISPLAY","DESCRIPTION:Angelus","END:VALARM",
+      "END:VEVENT"]);
+  });
+  L.push("END:VCALENDAR");
+  return L.join("\r\n");
+}
+var dl = null;
+function saveICS(btn){
+  var data = angelusICS(), name = "angelus.ics";
+  if(dl){
+    dl.save({filename:name, data:data, mimeType:"text/calendar"})
+      .then(function(){ btn.textContent = "Saved \u2713"; })
+      .catch(function(){ btn.textContent = "Declined"; });
+    return;
+  }
+  try{
+    var b = new Blob([data], {type:"text/calendar"});
+    var u = URL.createObjectURL(b);
+    var a = document.createElement("a");
+    a.href = u; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(u); }, 3000);
+    btn.textContent = "Opened \u2713";
+  }catch(e){ btn.textContent = "Unavailable"; }
+}
+if(window.claude && typeof window.claude.use === "function"){
+  window.claude.use("downloads").then(function(x){ dl = x; }).catch(function(){});
+}
+
+/* ============ guided mode ============ */
+var wl = null;
+function wake(on){
+  try{
+    if(on && navigator.wakeLock) navigator.wakeLock.request("screen").then(function(x){wl=x;}).catch(function(){});
+    else if(wl){ wl.release(); wl=null; }
+  }catch(e){}
+}
+document.addEventListener("visibilitychange", function(){
+  if(document.visibilityState==="visible" && G.on) wake(true);
+});
+
+function gStart(id){
+  var s = SETS[id]; if(!s) return;
+  G.on=true; G.id=id; G.i=0; G.steps=s.build(); gStop();
+  if(G.steps[0].k==="sil") G.sec = G.steps[0].sil;
+  document.getElementById("gd").classList.add("on");
+  document.body.style.overflow="hidden";
+  wake(true); if(id==="angelus") ringOnce(); gRender();
+}
+function gEnd(){
+  gStop(); G.on=false; wake(false);
+  document.getElementById("gd").classList.remove("on");
+  document.body.style.overflow="";
+  render();
+}
+function gRender(){
+  var s = G.steps[G.i];
+  var decs = Math.max.apply(null, G.steps.map(function(x){ return x.dec||0; }));
+  var body = '<div class="gttl">'+esc(s.t)+'</div>';
+
+  if(s.k === "sil"){
+    body += '<div class="gmyst" style="text-align:center;letter-spacing:.3em;font-size:38px">'+esc(s.word)+'</div>'+
+      '<div class="silc" id="silclock">'+mmss(G.run?G.sec:s.sil)+'</div>'+
+      '<div class="gsub" style="text-align:center">'+esc(s.sub||"")+'</div>';
+  } else if(s.k === "myst"){
+    body += '<div class="gmyst">'+esc(s.myst)+'</div>';
+    if(s.scr) body += '<div class="gscr">'+esc(s.scr)+'</div>';
+    if(s.sub) body += '<div class="gsub">'+esc(s.sub)+'</div>';
+  } else {
+    body += '<div class="gtext">'+esc(s.p)+'</div>';
+    if(s.sub) body += '<div class="gsub">'+esc(s.sub)+'</div>';
+  }
+  if(s.of && s.of > 1){
+    var dots = "";
+    for(var i=1;i<=s.of;i++) dots += '<i class="'+(i===s.n?"on":i<s.n?"past":"")+'"></i>';
+    body += '<div class="beads">'+dots+'</div>';
+  }
+  if(decs > 1){
+    var bars = "";
+    for(var d=1; d<=decs; d++) bars += '<i class="'+(d===s.dec?"on":(s.dec&&d<s.dec)?"past":"")+'"></i>';
+    body += '<div class="decs">'+bars+'</div>';
+  }
+  document.getElementById("gmid").innerHTML = body;
+  document.getElementById("gmid").scrollTop = 0;
+  document.getElementById("gpos").textContent = (G.i+1)+" / "+G.steps.length;
+  var last = G.i >= G.steps.length-1;
+  var sil = s.k==="sil";
+  document.getElementById("gnav").innerHTML =
+    (G.i>0 ? '<button class="btn ghost back" data-a="gprev">Back</button>' : '')+
+    (sil ? '<button class="btn ghost grow" data-a="sil">'+(G.run?"Pause":"Begin the work")+'</button>' : '')+
+    '<button class="btn grow" data-a="gnext">'+(last ? "Amen" : sil ? "Move on" : "Continue")+'</button>';
+  var c=document.getElementById("silclock"); if(c) c.classList.toggle("run", G.run);
+}
+function gGo(d){
+  gStop();
+  var n = G.i + d;
+  if(n < 0) return;
+  if(n >= G.steps.length){ gEnd(); return; }
+  G.i = n;
+  if(G.steps[n].k==="sil") G.sec = G.steps[n].sil;
+  gRender();
+}
+
+/* ============ events ============ */
+document.getElementById("nav").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-t]"); if(!b) return;
+  ST.tab = b.dataset.t; render();
+});
+document.addEventListener("click", function(e){
+  var b = e.target.closest("[data-a]"); if(!b) return;
+  var a = b.dataset.a;
+  if(a==="go") gStart(b.dataset.i);
+  else if(a==="tab"){ ST.tab = b.dataset.t; render(); }
+  else if(a==="gx") gEnd();
+  else if(a==="gnext") gGo(1);
+  else if(a==="gprev") gGo(-1);
+  else if(a==="sil") silToggle();
+  else if(a==="word"){ saveWord(b.dataset.w); render(); }
+  else if(a==="ring"){ ringAngelus(); b.textContent = "Ringing\u2026";
+    setTimeout(function(){ b.textContent = "Ring the bell"; }, 14000); }
+  else if(a==="ics"){ saveICS(b); }
+});
+document.addEventListener("change", function(e){
+  if(e.target.id==="ms"){ ST.myst = e.target.value; }
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){
+  paint(lit(new Date()).color);
+});
+
+render();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('./sw.js').catch(function(){}); });
+}
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persisted().then(function(p){ if(!p) navigator.storage.persist(); }).catch(function(){});
+}
+</script>
+</body>
+</html>

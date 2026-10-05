@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Apps</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f7f5f2;--surf:#fff;--line:#ddd5ca;--ink:#1c1916;--ink2:#5b5349;--ink3:#8b8378}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121011;--surf:#1b181a;--line:#332c33;--ink:#ece7e3;--ink2:#a79e96;--ink3:#766d66}}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-serif,Georgia,serif;
+  font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:480px;margin:0 auto;padding:40px 18px}
+h1{font-size:15px;letter-spacing:.26em;text-transform:uppercase;font-weight:400;color:var(--ink3);
+  text-align:center;margin:0 0 28px;font-family:ui-sans-serif,system-ui,sans-serif}
+a.app{display:flex;align-items:center;gap:15px;background:var(--surf);border:1px solid var(--line);
+  border-radius:15px;padding:17px;margin-bottom:13px;text-decoration:none;color:inherit}
+a.app img{width:52px;height:52px;border-radius:12px;flex-shrink:0}
+.nm{font-size:19px;font-weight:600;margin-bottom:2px}
+.ds{font-size:13.5px;color:var(--ink2);line-height:1.45;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+.note{font-size:13px;color:var(--ink3);text-align:center;margin-top:26px;line-height:1.6;
+  font-family:ui-sans-serif,system-ui,sans-serif}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Apps</h1>
+
+  <a class="app" href="./forge/">
+    <img src="./forge/icon-192.png" alt="">
+    <div><div class="nm">Forge</div>
+    <div class="ds">Training, hydration, electrolytes and intake</div></div>
+  </a>
+
+  <a class="app" href="./oratory/">
+    <img src="./oratory/icon-192.png" alt="">
+    <div><div class="nm">Oratory</div>
+    <div class="ds">Catholic prayer and the liturgical day</div></div>
+  </a>
+
+  <div class="note">Open each in Safari, then Share &rarr; Add to Home Screen.<br>
+  They run offline once installed.</div>
+</div>
+</body>
+</html>
