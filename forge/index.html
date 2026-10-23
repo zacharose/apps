@@ -89,6 +89,7 @@ h1 span{color:var(--accent)}
 :root:not([data-theme="light"]) .btn{color:#17120c}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .btn{color:#fff}}
 .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+:root .btn.ghost,:root:not([data-theme="dark"]) .btn.ghost,:root:not([data-theme="light"]) .btn.ghost{color:var(--ink)}
 .btn.sm{padding:9px;font-size:13.5px;min-height:38px}
 
 /* tabs */
@@ -238,7 +239,15 @@ function save(){
 load();
 if(!Array.isArray(S.custom)) S.custom = [];
 
-function key(d){ d = d || new Date(); return d.toISOString().slice(0,10); }
+/* The day rolls over at 4am LOCAL time (it used to be midnight UTC, which filed
+   anything after 7pm Central onto tomorrow). A 1am session still belongs to tonight. */
+function ymd(d){ return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+function key(d){ return ymd(new Date((d ? d.getTime() : Date.now()) - 4*3600000)); }
+function prevKey(k){ var p = k.split("-"); return ymd(new Date(+p[0], +p[1]-1, +p[2]-1, 12)); }
+function daysBetween(a, b){
+  var x = a.split("-"), y = b.split("-");
+  return Math.round((new Date(+y[0],+y[1]-1,+y[2],12) - new Date(+x[0],+x[1]-1,+x[2],12))/86400000);
+}
 function day(k){
   k = k || key();
   if(!S.days[k]) S.days[k] = {water:0, sodium:0, protein:0, kcal:0};
@@ -479,6 +488,40 @@ F.run = fig(
   mp('M146 64 L126 82 L110 92','M146 64 L170 76 L164 94',{c:'accent'})
 );
 
+/* --- Tyler twist: wind it up with the good hand, uncurl slowly with the bad --- */
+F.tyler = fig(
+  sp('M40 62 L118 62',{w:2.8})+
+  sc(8,128,62)+
+  mp('M150 24 L134 96','M124 24 L142 96',{c:'accent',w:6})+
+  mp('M150 24 L166 18','M124 24 L108 18',{w:2.4})+
+  sp('M196 44 q20 18 0 36',{c:'accent',w:1.9})+
+  sp('M196 80 l-6 -8 M196 80 l8 -3',{c:'accent',w:1.9})+
+  sp('M214 56 H246',{w:1.4,c:'ink3'}),
+  "0 0 300 112"
+);
+
+/* --- ab wheel: anti-extension; the back must not arch --- */
+F.abwheel = fig(
+  gnd(100,18,282)+
+  sp('M112 100 L118 84',{w:3})+
+  mc(9, 158,58, 196,76)+
+  mp('M118 84 L148 64','M118 84 L186 78')+
+  mp('M148 64 L172 86','M186 78 L234 86')+
+  mc(9, 178,91, 240,91, {c:'accent'})+
+  mp('M176 91 L182 91','M238 91 L244 91',{c:'accent',w:1.6})
+);
+
+/* --- Nordic curl: lower as slowly as control allows, catch with the hands --- */
+F.nordic = fig(
+  gnd(100,18,282)+
+  sp('M148 100 L186 100',{w:2.6})+
+  sp('M176 92 L196 92 L196 100 L176 100',{c:'accent',w:1.9})+
+  sp('M148 100 L148 92',{w:3})+
+  mc(9, 148,36, 94,64)+
+  mp('M148 92 L148 46','M148 92 L104 68')+
+  mp('M138 58 L132 78','M110 74 L96 94')
+);
+
 /* ---------------- workouts ---------------- */
 function v(q){ return "https://www.youtube.com/results?search_query=" + encodeURIComponent(q); }
 
@@ -497,6 +540,27 @@ var WORKOUTS = [
   ]
 },
 {
+  id:"floor", tag:"The floor — counts as done", name:"Spine Floor", dur:"2 min",
+  intro:"The minimum that still counts: one short round of the Big 3. For the night after a miss, a wrecked night, or any night the full ten won't happen. Done is done.",
+  warn:null,
+  moves:[
+    {n:"Curl-Up", s:"2 × 10s holds", cue:"Hands under the low back, one knee bent. Head and shoulders up an inch, chin tucked, spine does not round. Switch the bent knee for the second hold.", f:F.curlup, v:"mcgill curl up proper form"},
+    {n:"Side Plank", s:"10s each side", cue:"Forearm down, knees bent. Hip to the ceiling, body in one line.", f:F.sideplank, v:"mcgill side plank progression"},
+    {n:"Bird Dog", s:"10s each side", cue:"Opposite arm and leg to a straight line, no higher than the back. Brace like you're about to be punched.", f:F.birddog, v:"mcgill bird dog form"}
+  ]
+},
+{
+  id:"elbow", tag:"Daily — the tendon work", name:"Elbow", dur:"8 min",
+  intro:"Lateral epicondylitis is not inflammation despite the name — the tendon's collagen has degenerated and disorganised. That changes everything about the fix. Rest alone leaves you weaker with the same tendon. The tissue remodels under slow, heavy, eccentric load, and nothing else does it.",
+  warn:"If anyone offers a steroid injection, know what the trial showed: better relief at six weeks, worse recovery at one year, and higher recurrence than doing nothing at all. Pain up to about 5 out of 10 during these is expected and fine. What matters is that it settles within 24 hours — if the next morning is worse, go lighter.",
+  moves:[
+    {n:"Tyler Twist", s:"3 × 15 · 4s lower", cue:"TheraBand FlexBar held upright in the bad hand, wrist fully extended. Good hand grips the top and twists to wind it up. Now straighten both arms out in front of you and let the bad wrist uncurl slowly against the resistance — four seconds. That slow uncurl is the entire exercise. Red bar to start, green when red gets easy.", f:F.tyler, v:"tyler twist flexbar tennis elbow technique"},
+    {n:"No bar? Dumbbell version", s:"3 × 15 · 4s", cue:"Forearm flat on a bench, palm down, light weight. Lift with the other hand, lower with the bad one over four seconds. Same movement, same tempo, slightly less effective.", f:F.tyler, v:"eccentric wrist extension tennis elbow dumbbell"},
+    {n:"Extensor Stretch", s:"3 × 30s", cue:"Arm straight out, palm down, other hand pulls the fingers down and toward you. After the loading, never instead of it.", f:F.tyler, v:"wrist extensor stretch tennis elbow"},
+    {n:"Supination / Pronation", s:"2 × 12 each", cue:"Hold a hammer or a long wrench near the end of the handle, elbow tucked at your side. Rotate the palm up, then down, slowly. The weight at the far end does the work.", f:F.tyler, v:"hammer supination pronation forearm rehab"}
+  ]
+},
+{
   id:"legs", tag:"Sandbag + Kettlebell", name:"Legs & Carries", dur:"25 min",
   intro:"Heaviest night of the week. Everything here is a load you have to hold onto and control, which is closer to carrying a water heater up basement stairs than any machine.",
   warn:"Hinge means hips back, not back rounded. The moment the low back rounds under load, the set is over — put it down.",
@@ -507,7 +571,8 @@ var WORKOUTS = [
     {n:"Kettlebell Goblet Squat", s:"3 × 10", cue:"Bell at the chest, elbows inside the knees at the bottom. Pause a beat down there and pry the knees out.", f:F.squat, v:"goblet squat form kettlebell"},
     {n:"Kettlebell Swing", s:"10 × 10 · EMOM", cue:"Hip snap, not a squat and not a front raise. The bell floats — you don't lift it. Every minute on the minute, ten reps, rest the remainder.", f:F.swing, v:"kettlebell swing hip hinge form"},
     {n:"Sandbag Bear-Hug Carry", s:"4 × 40 yd", cue:"Bag high on the chest, squeeze it into you, breathe shallow and walk. Ribs down the whole way.", f:F.sandbag, v:"sandbag bear hug carry"},
-    {n:"Suitcase Carry", s:"3 × 40 yd each", cue:"One bell, one side. Do not lean — stay dead vertical. This is the best anti-side-bend core work there is, and it costs nothing.", f:F.carry, v:"suitcase carry form core"}
+    {n:"Nordic Curl", s:"2 × 3–5 · lower only", cue:"Kneel on something soft, heels wedged under a couch or a loaded sandbag. Lower forward as slowly as control allows, catch yourself on your hands, then push back up with the arms — do not try to pull yourself up with the hamstrings yet. Three reps is a real first session. More than that and you will not walk properly for four days.", f:F.nordic, v:"nordic hamstring curl beginner progression"},
+  {n:"Suitcase Carry", s:"3 × 40 yd each", cue:"One bell, one side. Do not lean — stay dead vertical. This is the best anti-side-bend core work there is, and it costs nothing.", f:F.carry, v:"suitcase carry form core"}
   ]
 },
 {
@@ -533,7 +598,8 @@ var WORKOUTS = [
     {n:"Sandbag Clean to Shoulder", s:"5 × 5 alternating", cue:"Hinge, pull the bag to the hips, then shrug and catch it on the shoulder. Alternate shoulders each rep.", f:F.sandbag, v:"sandbag clean to shoulder"},
     {n:"Kettlebell Swing", s:"5 × 15", cue:"Power from the hips. Rest 45 seconds between.", f:F.swing, v:"kettlebell swing form"},
     {n:"Sandbag Bent Row", s:"4 × 8", cue:"Hinge to about 45°, hold the position, row to the belly. The back stays flat the entire set.", f:F.hinge, v:"sandbag bent over row"},
-    {n:"Dead Bug", s:"3 × 8 each", cue:"Low back pressed flat to the floor and it never leaves. Opposite arm and leg, slow. If the back lifts, shorten the range.", f:F.deadbug, v:"dead bug exercise form"},
+    {n:"Ab Wheel Rollout", s:"3 × 6–8", cue:"From the knees. Ribs pulled down, glutes squeezed, and roll out only as far as you can go without the low back arching. The arch is the failure — not the distance. Start by rolling toward a wall set close, and move the wall back a few inches every week.", f:F.abwheel, v:"ab wheel rollout from knees proper form"},
+  {n:"Dead Bug", s:"3 × 8 each", cue:"Low back pressed flat to the floor and it never leaves. Opposite arm and leg, slow. If the back lifts, shorten the range.", f:F.deadbug, v:"dead bug exercise form"},
     {n:"Chin Tuck + Neck Isometrics", s:"2 min", cue:"Finish every session with this. Two minutes, four directions, light pressure.", f:F.necksio, v:"neck isometrics beginner"}
   ]
 },
@@ -547,7 +613,8 @@ var WORKOUTS = [
     {n:"Single-Leg Glute Bridge", s:"3 × 8 each", cue:"One foot planted, other knee hugged in. Drive through the heel, no arch in the low back.", f:F.glutebridge, v:"single leg glute bridge"},
     {n:"Bird Dog", s:"3 × 8 each · 5s", cue:"Slow. The hold is the work, not the rep count.", f:F.birddog, v:"bird dog exercise"},
     {n:"Side Plank", s:"3 × 25s each", cue:"Hip high, body in a line.", f:F.sideplank, v:"side plank"},
-    {n:"Prone Back Extension", s:"3 × 8 · 5s", cue:"Face down, lift chest and thighs a few inches, hold, lower. Stop at straight — never arch past neutral.", f:F.glutebridge, v:"prone back extension superman form"},
+    {n:"Ab Wheel Rollout", s:"3 × 6–8", cue:"Knees down, ribs down, glutes tight. Only as far as the low back stays flat. Anti-extension work — you are resisting the arch, not reaching for distance.", f:F.abwheel, v:"ab wheel rollout knees beginner"},
+  {n:"Prone Back Extension", s:"3 × 8 · 5s", cue:"Face down, lift chest and thighs a few inches, hold, lower. Stop at straight — never arch past neutral.", f:F.glutebridge, v:"prone back extension superman form"},
     {n:"Neck Isometrics", s:"2 min", cue:"Four directions, light pressure, no movement.", f:F.necksio, v:"neck isometric exercises"}
   ]
 }];
@@ -711,11 +778,13 @@ function mmss(s){
 }
 
 function startFocus(kind, id){
-  var src = kind==="w" ? WORKOUTS.filter(function(x){return x.id===id;})[0]
-                       : CARDIO.filter(function(x){return x.id===id;})[0];
+  var wid = kind==="n" ? (id==="floor" ? "floor" : "spine") : id;
+  var src = kind==="c" ? CARDIO.filter(function(x){return x.id===wid;})[0]
+                       : WORKOUTS.filter(function(x){return x.id===wid;})[0];
   if(!src) return;
-  FX.on=true; FX.kind=kind; FX.id=id; FX.i=0; FX.elapsed=0; FX.t0=Date.now();
-  FX.items = kind==="w" ? src.moves.slice() : [src];
+  FX.on=true; FX.kind=kind; FX.id=id; FX.i=0; FX.elapsed=0; FX.t0=Date.now(); FX.logged=false;
+  FX.items = kind==="c" ? [src] : src.moves.slice();
+  if(kind==="n") FX.items.push({pray:true, n:"Now pray", s:"Same sitting"});
   document.getElementById("focus").classList.add("on");
   document.body.style.overflow="hidden";
   beep(1); wake(true);
@@ -723,7 +792,9 @@ function startFocus(kind, id){
 }
 function endFocus(logIt){
   stopTimer();
-  if(logIt && FX.kind==="w"){
+  if(logIt && FX.kind==="n"){
+    logNight();
+  } else if(logIt && FX.kind==="w"){
     S.sessions.push({w:FX.id, t:Date.now()});
   } else if(logIt && FX.kind==="c"){
     var mins = Math.max(1, Math.round((Date.now()-FX.t0)/60000));
@@ -766,6 +837,19 @@ function fxRender(){
   }).join("");
   document.getElementById("fdots").innerHTML = FX.items.length>1 ? dots : "";
 
+  if(it.pray){
+    document.getElementById("fmid").innerHTML =
+      '<div class="fname">Body\'s done. Logged.</div>'+
+      '<div class="fsets">Now the prayer &mdash; same sitting.</div>'+
+      '<a class="btn" href="'+oratoryLink()+'" target="_blank" rel="noopener" style="text-decoration:none;margin-top:14px">'+
+        (FX.id==="floor" ? 'Open Oratory &mdash; 2-min night prayer' : 'Open Oratory &mdash; night prayer')+'</a>'+
+      '<div class="fcue">No signal, or Oratory won\'t open? Pray this here. It counts.</div>'+
+      '<div class="fcue" style="white-space:pre-wrap;color:var(--ink)">'+esc(FLOOR_PRAYER)+'</div>';
+    document.getElementById("fmid").scrollTop = 0;
+    fxNav();
+    return;
+  }
+
   var g = cardio ? null : guessTimer(it.s);
   FX.up = cardio;
   FX.sec = cardio ? Math.round((Date.now()-FX.t0)/1000) : (g ? g.sec : 0);
@@ -792,6 +876,12 @@ function fxRender(){
 }
 function fxNav(){
   var last = FX.i >= FX.items.length-1, cardio = FX.kind==="c";
+  if(FX.items[FX.i] && FX.items[FX.i].pray){
+    document.getElementById("fnav").innerHTML =
+      '<button class="btn ghost back" data-a="fprev">Back</button>'+
+      '<button class="btn grow" data-a="fnext">Finish</button>';
+    return;
+  }
   var runLbl = FX.run ? "Pause" : (FX.up ? "Start clock" : "Start timer");
   document.getElementById("fnav").innerHTML =
     (FX.i>0 ? '<button class="btn ghost back" data-a="fprev">Back</button>' : '')+
@@ -803,14 +893,15 @@ function fxGo(d){
   var n = FX.i + d;
   if(n < 0) return;
   if(n >= FX.items.length){ endFocus(true); return; }
+  if(FX.kind==="n" && FX.items[n].pray) logNight();
   FX.i = n; fxRender(); beep(1,740);
 }
 
 /* what to do right now — one answer, not eleven */
 function suggest(){
   var today = key(), now = Date.now();
-  var didSpine = S.sessions.some(function(x){ return x.w==="spine" && key(new Date(x.t))===today; });
-  if(!didSpine) return {kind:"w", id:"spine"};
+  var didElbow = S.sessions.some(function(x){ return x.w==="elbow" && key(new Date(x.t))===today; });
+  if(!didElbow) return {kind:"w", id:"elbow"};
   var best=null, oldest=-1;
   ["legs","mace","full","bw"].forEach(function(id){
     var t = 0;
@@ -818,10 +909,72 @@ function suggest(){
     var age = now - t;
     if(age > oldest){ oldest = age; best = id; }
   });
-  var liftToday = S.sessions.some(function(x){ return x.w!=="spine" && key(new Date(x.t))===today; });
+  var liftToday = S.sessions.some(function(x){ return x.w!=="spine" && x.w!=="floor" && key(new Date(x.t))===today; });
   if(liftToday) return {kind:"c", id:"walk"};
   return {kind:"w", id:best||"full"};
 }
+
+/* ---------------- the night anchor ----------------
+   One routine a night: Spine & Neck (or the 2-minute floor), then prayer in Oratory.
+   No streaks and no miss counter. The app only looks at whether last night happened,
+   so it can say "floor tonight" after a miss. */
+var ORATORY = "https://claude.ai/artifact/QE3Cj1ugwk1fd2oBJgaqmj";
+function oratoryLink(){ return ORATORY + (FX.id==="floor" ? "#night-floor" : "#night"); }
+var FLOOR_PRAYER =
+  "In the name of the Father, and of the Son, and of the Holy Spirit. Amen.\n\n"+
+  "Our Father, who art in heaven, hallowed be thy name; thy kingdom come; thy will be done on earth as it is in heaven. "+
+  "Give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; "+
+  "and lead us not into temptation, but deliver us from evil. Amen.\n\n"+
+  "O my God, I am heartily sorry for having offended Thee, and I detest all my sins because of Thy just punishments, "+
+  "but most of all because they offend Thee, my God, who art all good and deserving of all my love. "+
+  "I firmly resolve, with the help of Thy grace, to sin no more and to avoid the near occasions of sin. Amen.\n\n"+
+  "In the name of the Father, and of the Son, and of the Holy Spirit. Amen.";
+function logNight(){
+  if(FX.logged) return;
+  S.sessions.push({w: FX.id==="floor" ? "floor" : "spine", t: Date.now(), night: true});
+  FX.logged = true; save();
+}
+function anchorState(){
+  var k = key(), done = {}, last = "";
+  S.sessions.forEach(function(x){
+    if(x.w==="spine" || x.w==="floor"){ var d = key(new Date(x.t)); done[d] = 1; if(d > last) last = d; }
+  });
+  if(done[k]) return "done";
+  if(!last) return "new";
+  if(done[prevKey(k)]) return "ontrack";
+  return daysBetween(last, k) > 7 ? "long" : "missed";
+}
+function vNight(){
+  var st = anchorState();
+  if(st === "done"){
+    return '<div class="card" style="border-color:var(--ok)">'+
+      '<h2 style="color:var(--ok)">Tonight &middot; done</h2>'+
+      '<div class="big" style="margin-bottom:2px">Body&rsquo;s done.</div>'+
+      '<div class="sub" style="margin-bottom:12px">If you haven&rsquo;t prayed yet, it&rsquo;s one tap.</div>'+
+      '<a class="btn ghost sm" href="'+ORATORY+'#night" target="_blank" rel="noopener" style="text-decoration:none">Open Oratory</a>'+
+      '</div>';
+  }
+  var line = {
+    "new":     "Start with the floor. Four minutes, and it counts.",
+    "missed":  "One miss is nothing. Floor tonight.",
+    "long":    "Been a while. Floor tonight &mdash; that is the whole restart.",
+    "ontrack": "Spine &amp; Neck, then prayer. One start, done before bed."
+  }[st];
+  var floorFirst = st !== "ontrack";
+  var bFloor = '<button class="btn'+(floorFirst?'':' ghost sm')+'" data-a="night" data-m="floor"'+(floorFirst?'':' style="margin-top:8px"')+'>Floor &middot; about 4 min</button>';
+  var bFull  = '<button class="btn'+(floorFirst?' ghost sm':'')+'" data-a="night" data-m="full"'+(floorFirst?' style="margin-top:8px"':'')+'>Full &middot; about 15 min</button>';
+  return '<div class="card" style="border-color:var(--accent)">'+
+    '<h2 style="color:var(--accent)">Tonight</h2>'+
+    '<div class="big" style="margin-bottom:4px">The night anchor</div>'+
+    '<div class="sub" style="margin-bottom:12px">'+line+'</div>'+
+    (floorFirst ? bFloor + bFull : bFull + bFloor)+
+    '<div class="note">When the phone goes on the charger, open this and tap. The floor counts the same as the full.</div>'+
+    '</div>';
+}
+var intakeOpen = false;
+document.addEventListener("toggle", function(e){
+  if(e.target && e.target.id === "intake") intakeOpen = e.target.open;
+}, true);
 
 /* ---------------- views ---------------- */
 var tab = "today";
@@ -834,20 +987,25 @@ function vNow(){
                          : CARDIO.filter(function(x){return x.id===g.id;})[0];
   if(!src) return '';
   var n = (g.kind==="w" ? src.moves.length+" movements" : "one session");
-  return '<div class="card" style="border-color:var(--accent)">'+
-    '<h2 style="color:var(--accent)">Right now</h2>'+
+  return '<div class="card">'+
+    '<h2>Training night</h2>'+
     '<div class="big" style="margin-bottom:2px">'+esc(src.name)+'</div>'+
     '<div class="sub" style="margin-bottom:12px">'+esc(src.dur)+' &middot; '+n+
-    (g.id==="spine" ? ' &middot; safe every day' : '')+'</div>'+
-    '<button class="btn" data-a="go" data-k="'+g.kind+'" data-i="'+g.id+'">Start</button>'+
+    '</div>'+
+    '<button class="btn ghost" data-a="go" data-k="'+g.kind+'" data-i="'+g.id+'">Start</button>'+
     '<button class="btn ghost sm" data-a="tab" data-t="work" style="margin-top:8px">Something else</button>'+
+    '<div class="note">Twice a week, on the nights before a day off. Extra to the anchor, never instead of it.</div>'+
     '</div>';
 }
 
 function vToday(){
   var d = day(), wt = waterTarget(), st = sodiumTarget(), pt = proteinTarget();
   var wp = Math.min(100, d.water/wt*100), sp = Math.min(100, d.sodium/st*100), pp = Math.min(100, d.protein/pt*100);
-  return vNow()+
+  return vNight()+vNow()+
+  '<details class="wk" id="intake"'+(intakeOpen?' open':'')+'><summary>'+
+    '<div class="grow"><div class="tag">Water &middot; salt &middot; protein</div><div class="nm">Intake today</div></div>'+
+    '<div class="dur">'+Math.round(d.water)+' oz &middot; '+Math.round(d.protein)+' g</div></summary>'+
+  '<div class="wkbody">'+
   '<div class="card">'+
     '<h2>Water</h2>'+
     '<div class="row sb"><div class="big" style="color:var(--water)">'+Math.round(d.water)+' <span class="unit">/ '+wt+' oz</span></div></div>'+
@@ -897,7 +1055,9 @@ function vToday(){
     '</div>'+
   '</div>'+
 
-  '<button class="btn ghost sm" data-a="reset">Reset today</button>';
+  '<button class="btn ghost sm" data-a="reset">Reset today</button>'+
+  '<div class="note">Busy day? Log the bottle when you mix it and skip the rest.</div>'+
+  '</div></details>';
 }
 
 function vMix(){
@@ -983,7 +1143,7 @@ function vMix(){
 
 function vWork(){
   var h = '<div class="card"><h2>How to run these</h2>'+
-    '<div class="sub">Spine &amp; Neck is daily. Pick two of the others per week — the nights before a day off, late, when the house is down. '+
+    '<div class="sub">Spine &amp; Neck (or the 2-minute Spine Floor) is the nightly anchor &mdash; start it from Today. Pick two of the others per week — the nights before a day off, late, when the house is down. '+
     'Two sessions you actually do beats six you don\'t.</div></div>';
   h += WORKOUTS.map(function(w){
     return '<details class="wk"><summary>'+
@@ -1223,6 +1383,7 @@ document.addEventListener("click", function(e){
     if(p||k){ d.protein += p; d.kcal += k; save(); render(); }
   }
   else if(a==="go"){ startFocus(b.dataset.k, b.dataset.i); }
+  else if(a==="night"){ startFocus("n", b.dataset.m); }
   else if(a==="tab"){ tab = b.dataset.t; render(); }
   else if(a==="fx"){ endFocus(false); }
   else if(a==="fnext"){ fxGo(1); }
